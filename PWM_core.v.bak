@@ -1,0 +1,48 @@
+module PWM_core #(parameter n = 32, parameter m = 4)( 
+input reset, clk,
+input [n-1:0] duty_in, period,
+input [m-1:0] byteenable,
+ output reg pOut
+);
+
+
+reg [n-1:0] duty_cycle, counter_d;
+
+
+always@(posedge clk or negedge reset)
+begin
+	
+	
+   if(~reset) 
+   begin
+		counter_d <= 32'b1; 
+		duty_cycle <= 32'b0;
+	end
+	
+	else if(counter_d == period)
+	begin
+		counter_d <= 32'b0;
+	end
+	
+	else 
+	begin
+		counter_d <= counter_d + 1'b1;
+		if(byteenable[0]) duty_cycle[7:0] <= duty_in[7:0];
+		if(byteenable[1]) duty_cycle[15:8] <= duty_in[15:8];
+		if(byteenable[2]) duty_cycle[23:16] <= duty_in[23:16];
+		if(byteenable[3]) duty_cycle[31:24] <= duty_in[31:24];
+	end
+	
+end 
+
+
+always@(posedge clk)
+begin
+	if(counter_d <= duty_cycle)
+		pOut = 1'b1;
+	
+	else 
+		pOut = 1'b0;
+		
+end
+endmodule
